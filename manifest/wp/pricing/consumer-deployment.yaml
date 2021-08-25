@@ -19,7 +19,7 @@ spec:
       imagePullPolicy: Always
       containers:
         - name: pricing-consumer
-          image: rhorv/wp-poc:latest
+          image: rhorv/wp-poc:673005e4a6429d33edd19c9f759dddbe444bc288
           command: ["java", "-jar", "/srv/gs-maven-0.1.0.jar", "pricing"]
           env:
             - name: KAFKA_HOST
