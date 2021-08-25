@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-poc-pricing
+  labels:
+    app.wp.poc/name: wp-pricing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.wp.poc/name: wp-pricing
+  template:
+    metadata:
+      labels:
+        app.wp.poc/name: wp-pricing
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      imagePullPolicy: Always
+      containers:
+        - name: pricing-consumer
+          image: rhorv/wp-poc:latest
+          command: ["java", "-jar", "/srv/gs-maven-0.1.0.jar", "pricing"]
+          env:
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: KAFKA_CLEARING_EXTERNAL_TOPIC_NAME
+              value: "clearing-payment"
+            - name: KAFKA_PRICING_EXTERNAL_TOPIC_NAME
+              value: "pricing-payment"
+            - name: KAFKA_PRICING_INTERNAL_TOPIC_NAME
+              value: "pricing-internal"

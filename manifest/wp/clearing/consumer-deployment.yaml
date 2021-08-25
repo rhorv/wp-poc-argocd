@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-poc-clearing
+  labels:
+    app.wp.poc/name: wp-clearing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.wp.poc/name: wp-clearing
+  template:
+    metadata:
+      labels:
+        app.wp.poc/name: wp-clearing
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      imagePullPolicy: Always
+      containers:
+        - name: clearing-consumer
+          image: rhorv/wp-poc:latest
+          command: ["java", "-jar", "/srv/gs-maven-0.1.0.jar", "clearing"]
+          env:
+            - name: PG_CLEARING_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: clearing-db-config
+                  key: host
+            - name: PG_CLEARING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: clearing-db-config
+                  key: port
+            - name: PG_CLEARING_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: clearing-db-config
+                  key: db
+            - name: PG_CLEARING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: clearing-db-creds
+                  key: user
+            - name: PG_CLEARING_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: clearing-db-creds
+                  key: pass
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: KAFKA_CLEARING_EXTERNAL_TOPIC_NAME
+              value: "clearing-payment"
+            - name: KAFKA_CLEARING_INTERNAL_TOPIC_NAME
+              value: "clearing-internal"
