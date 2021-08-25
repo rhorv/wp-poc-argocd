@@ -20,7 +20,7 @@ spec:
         - name: clearing-consumer
           image: rhorv/wp-poc:673005e4a6429d33edd19c9f759dddbe444bc288
           imagePullPolicy: IfNotPresent
-          command: ["java", "-jar", "/srv/gs-maven-0.1.0.jar", "clearing"]
+          command: ["/bin/bash", "/srv/bin/run_clearing.sh"]
           env:
             - name: PG_CLEARING_HOST
               valueFrom:
