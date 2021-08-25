@@ -16,6 +16,41 @@ spec:
     spec:
       imagePullSecrets:
         - name: regcred
+      initContainers:
+        - name: kafka-topic-setup
+          image: rhorv/kafka-adm:latest
+          command: ["sh", "-c", "/tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${EXTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT} && /tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${INTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT}"]
+          env:
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: EXTERNAL_TOPIC_NAME
+              value: "clearing-payment"
+            - name: INTERNAL_TOPIC_NAME
+              value: "clearing-internal"
+        - name: kafka-external-topic-setup
+          image: rhorv/kafka-adm:latest
+          command: ["/bin/sh", "/tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT}"]
+          env:
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: TOPIC_NAME
+              value: "clearing-internal"
       containers:
         - name: clearing-consumer
           image: rhorv/wp-poc:89a2b5eb76646cb7f00d51b627340595fef28987
