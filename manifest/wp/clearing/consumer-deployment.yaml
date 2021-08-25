@@ -20,7 +20,7 @@ spec:
         - name: clearing-consumer
           image: rhorv/wp-poc:89a2b5eb76646cb7f00d51b627340595fef28987
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh", "-c", "/srv/run_clearing.sh"]
+          command: ["/bin/sh", "/srv/run_clearing.sh"]
           env:
             - name: PG_CLEARING_HOST
               valueFrom:
