@@ -18,7 +18,7 @@ spec:
         - name: regcred
       containers:
         - name: pricing-consumer
-          image: rhorv/wp-poc:673005e4a6429d33edd19c9f759dddbe444bc288
+          image: rhorv/wp-poc:9bac3ed065a39e9e6988136a2acb4384b469c33d
           imagePullPolicy: IfNotPresent
           command: ["java", "-jar", "/srv/gs-maven-0.1.0.jar", "pricing"]
           env:
