@@ -37,7 +37,7 @@ spec:
               value: "clearing-internal"
       containers:
         - name: clearing-consumer
-          image: rhorv/wp-poc:89a2b5eb76646cb7f00d51b627340595fef28987
+          image: rhorv/wp-poc:45c816c7dec9782d65b32c145d220d0adb2b2fd4
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_clearing.sh"]
           env:
