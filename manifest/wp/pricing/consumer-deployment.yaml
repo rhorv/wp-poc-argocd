@@ -16,10 +16,10 @@ spec:
     spec:
       imagePullSecrets:
         - name: regcred
-      imagePullPolicy: Always
       containers:
         - name: pricing-consumer
           image: rhorv/wp-poc:673005e4a6429d33edd19c9f759dddbe444bc288
+          imagePullPolicy: IfNotPresent
           command: ["java", "-jar", "/srv/gs-maven-0.1.0.jar", "pricing"]
           env:
             - name: KAFKA_HOST
