@@ -37,7 +37,7 @@ spec:
               value: "pricing-internal"
       containers:
         - name: pricing-consumer
-          image: rhorv/wp-poc:d05c1970564c9281daeda0998ef157a98b1bb07b
+          image: rhorv/wp-poc:980935540f4f96f132e01dd7e07b6ce755e60ab4
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_pricing.sh"]
           env:
