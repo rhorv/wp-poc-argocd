@@ -41,6 +41,31 @@ spec:
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_pricing.sh"]
           env:
+            - name: PG_PRICING_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: pricing-db-config
+                  key: host
+            - name: PG_PRICING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: pricing-db-config
+                  key: port
+            - name: PG_PRICING_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: pricing-db-config
+                  key: db
+            - name: PG_PRICING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pricing-db-creds
+                  key: user
+            - name: PG_PRICING_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: pricing-db-creds
+                  key: pass
             - name: KAFKA_HOST
               valueFrom:
                 configMapKeyRef:
