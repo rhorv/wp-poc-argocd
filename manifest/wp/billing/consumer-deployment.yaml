@@ -68,7 +68,7 @@ spec:
                   key: pass
       containers:
         - name: billing-consumer
-          image: rhorv/wp-poc:6007ff1de4faa784fbd25d547d5fe9d7ef1d336f
+          image: rhorv/wp-poc:3b5c3b03cf1ceb3a9bf36d07c5e04ba4bf57d839
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_billing.sh"]
           env:
