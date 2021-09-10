@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wp-poc-clearing
+  name: wp-poc-billing
   labels:
-    app.wp.poc/name: wp-clearing
+    app.wp.poc/name: wp-billing
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.wp.poc/name: wp-clearing
+      app.wp.poc/name: wp-billing
   template:
     metadata:
       labels:
-        app.wp.poc/name: wp-clearing
+        app.wp.poc/name: wp-billing
     spec:
       imagePullSecrets:
         - name: regcred
@@ -33,69 +33,69 @@ spec:
                   name: kafka-config
                   key: port
             - name: EXTERNAL_TOPIC_NAME
-              value: "clearing-payment"
+              value: "billing-payment"
             - name: INTERNAL_TOPIC_NAME
-              value: "clearing-internal"
+              value: "billing-internal"
         - name: db-migration
           image: rhorv/wp-poc-infra:latest
           imagePullPolicy: IfNotPresent
-          command: ["make", "clearing-db-migrate"]
+          command: ["make", "billing-db-migrate"]
           env:
-            - name: PG_CLEARING_HOST
+            - name: PG_BILLING_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: clearing-db-config
+                  name: billing-db-config
                   key: host
-            - name: PG_CLEARING_PORT
+            - name: PG_BILLING_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: clearing-db-config
+                  name: billing-db-config
                   key: port
-            - name: PG_CLEARING_DB
+            - name: PG_BILLING_DB
               valueFrom:
                 configMapKeyRef:
-                  name: clearing-db-config
+                  name: billing-db-config
                   key: db
-            - name: PG_CLEARING_USER
+            - name: PG_BILLING_USER
               valueFrom:
                 secretKeyRef:
-                  name: clearing-db-creds
+                  name: billing-db-creds
                   key: user
-            - name: PG_CLEARING_PASS
+            - name: PG_BILLING_PASS
               valueFrom:
                 secretKeyRef:
-                  name: clearing-db-creds
+                  name: billing-db-creds
                   key: pass
       containers:
-        - name: clearing-consumer
+        - name: billing-consumer
           image: rhorv/wp-poc:c72e5860f8017da9be5adff14c45866cf38983cd
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh", "/srv/run_clearing.sh"]
+          command: ["/bin/sh", "/srv/run_billing.sh"]
           env:
-            - name: PG_CLEARING_HOST
+            - name: PG_BILLING_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: clearing-db-config
+                  name: billing-db-config
                   key: host
-            - name: PG_CLEARING_PORT
+            - name: PG_BILLING_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: clearing-db-config
+                  name: billing-db-config
                   key: port
-            - name: PG_CLEARING_DB
+            - name: PG_BILLING_DB
               valueFrom:
                 configMapKeyRef:
-                  name: clearing-db-config
+                  name: billing-db-config
                   key: db
-            - name: PG_CLEARING_USER
+            - name: PG_BILLING_USER
               valueFrom:
                 secretKeyRef:
-                  name: clearing-db-creds
+                  name: billing-db-creds
                   key: user
-            - name: PG_CLEARING_PASS
+            - name: PG_BILLING_PASS
               valueFrom:
                 secretKeyRef:
-                  name: clearing-db-creds
+                  name: billing-db-creds
                   key: pass
             - name: KAFKA_HOST
               valueFrom:
@@ -107,7 +107,9 @@ spec:
                 configMapKeyRef:
                   name: kafka-config
                   key: port
-            - name: KAFKA_CLEARING_EXTERNAL_TOPIC_NAME
-              value: "clearing-payment"
-            - name: KAFKA_CLEARING_INTERNAL_TOPIC_NAME
-              value: "clearing-internal"
+            - name: KAFKA_PRICING_EXTERNAL_TOPIC_NAME
+              value: "pricing-payment"
+            - name: KAFKA_BILLING_EXTERNAL_TOPIC_NAME
+              value: "billing-payment"
+            - name: KAFKA_BILLING_INTERNAL_TOPIC_NAME
+              value: "billing-internal"
