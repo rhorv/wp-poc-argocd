@@ -39,7 +39,7 @@ spec:
         - name: db-migration
           image: rhorv/wp-poc-db-infra:7d8bd30f3ed2e6d7950f76f4a7da830f9173acb8
           imagePullPolicy: IfNotPresent
-          command: ["flyway", "-locations=filesystem:/srv/clearing", "-user=$${PG_CLEARING_USER}", "-password=$${PG_CLEARING_PASS}", "-url=jdbc:postgresql://$${PG_CLEARING_HOST}:$${PG_CLEARING_PORT}/$${PG_CLEARING_DB}", "migrate"]
+          command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/clearing -user=$${PG_CLEARING_USER} -password=$${PG_CLEARING_PASS} -url=jdbc:postgresql://$${PG_CLEARING_HOST}:$${PG_CLEARING_PORT}/$${PG_CLEARING_DB} migrate"]
           env:
             - name: PG_CLEARING_HOST
               valueFrom:

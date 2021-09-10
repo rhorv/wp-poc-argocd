@@ -39,7 +39,7 @@ spec:
         - name: db-migration
           image: rhorv/wp-poc-db-infra:7d8bd30f3ed2e6d7950f76f4a7da830f9173acb8
           imagePullPolicy: IfNotPresent
-          command: ["flyway", "-locations=filesystem:/srv/clearing", "-user=$${PG_PRICING_USER}", "-password=$${PG_PRICING_PASS}", "-url=jdbc:postgresql://$${PG_PRICING_HOST}:$${PG_PRICING_PORT}/$${PG_PRICING_DB}", "migrate"]
+          command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/clearing -user=$${PG_PRICING_USER} -password=$${PG_PRICING_PASS} -url=jdbc:postgresql://$${PG_PRICING_HOST}:$${PG_PRICING_PORT}/$${PG_PRICING_DB} migrate"]
           env:
             - name: PG_PRICING_HOST
               valueFrom:
