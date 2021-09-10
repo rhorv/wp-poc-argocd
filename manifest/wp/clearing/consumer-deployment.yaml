@@ -37,7 +37,7 @@ spec:
             - name: INTERNAL_TOPIC_NAME
               value: "clearing-internal"
         - name: db-migration
-          image: rhorv/wp-poc-db-infra:latest
+          image: rhorv/wp-poc-db-infra:7d8bd30f3ed2e6d7950f76f4a7da830f9173acb8
           imagePullPolicy: IfNotPresent
           command: ["flyway", "-locations=filesystem:/srv/clearing", "-user=$${PG_CLEARING_USER}", "-password=$${PG_CLEARING_PASS}", "-url=jdbc:postgresql://$${PG_CLEARING_HOST}:$${PG_CLEARING_PORT}/$${PG_CLEARING_DB}", "migrate"]
           env:
@@ -68,7 +68,7 @@ spec:
                   key: pass
       containers:
         - name: clearing-consumer
-          image: rhorv/wp-poc:3b5c3b03cf1ceb3a9bf36d07c5e04ba4bf57d839
+          image: rhorv/wp-poc:7d8bd30f3ed2e6d7950f76f4a7da830f9173acb8
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_clearing.sh"]
           env:
