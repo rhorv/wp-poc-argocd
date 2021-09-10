@@ -18,7 +18,7 @@ spec:
         - name: regcred
       initContainers:
         - name: kafka-topic-setup
-          image: rhorv/wp-poc-infra:6007ff1de4faa784fbd25d547d5fe9d7ef1d336f
+          image: rhorv/kafka-adm:latest
           imagePullPolicy: IfNotPresent
           command: ["sh", "-c", "/tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${EXTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT} && /tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${INTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT}"]
           env:
@@ -37,9 +37,9 @@ spec:
             - name: INTERNAL_TOPIC_NAME
               value: "clearing-internal"
         - name: db-migration
-          image: rhorv/wp-poc-infra:6007ff1de4faa784fbd25d547d5fe9d7ef1d336f
+          image: rhorv/wp-poc-db-infra:latest
           imagePullPolicy: IfNotPresent
-          command: ["make", "clearing-db-migrate"]
+          command: ["flyway", "-locations=filesystem:/srv/clearing", "-user=$${PG_CLEARING_USER}", "-password=$${PG_CLEARING_PASS}", "-url=jdbc:postgresql://$${PG_CLEARING_HOST}:$${PG_CLEARING_PORT}/$${PG_CLEARING_DB}", "migrate"]
           env:
             - name: PG_CLEARING_HOST
               valueFrom:
