@@ -37,7 +37,7 @@ spec:
             - name: INTERNAL_TOPIC_NAME
               value: "pricing-internal"
         - name: db-migration
-          image: rhorv/wp-poc-db-infra:7d8bd30f3ed2e6d7950f76f4a7da830f9173acb8
+          image: rhorv/wp-poc-db-infra:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/pricing -user=$${PG_PRICING_USER} -password=$${PG_PRICING_PASS} -url=jdbc:postgresql://$${PG_PRICING_HOST}:$${PG_PRICING_PORT}/$${PG_PRICING_DB} migrate"]
           env:
@@ -68,7 +68,7 @@ spec:
                   key: pass
       containers:
         - name: pricing-consumer
-          image: rhorv/wp-poc:7d8bd30f3ed2e6d7950f76f4a7da830f9173acb8
+          image: rhorv/wp-poc:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_pricing.sh"]
           env:
