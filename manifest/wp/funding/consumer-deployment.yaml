@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-poc-funding
+  labels:
+    app.wp.poc/name: wp-funding
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.wp.poc/name: wp-funding
+  template:
+    metadata:
+      labels:
+        app.wp.poc/name: wp-funding
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      initContainers:
+        - name: kafka-topic-setup
+          image: rhorv/kafka-adm:latest
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "/tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${EXTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT} && /tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${INTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT}"]
+          env:
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: EXTERNAL_TOPIC_NAME
+              value: "funding-payment"
+            - name: INTERNAL_TOPIC_NAME
+              value: "funding-internal"
+        - name: db-migration
+          image: rhorv/wp-poc-db-infra:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/funding -user=$${PG_FUNDING_USER} -password=$${PG_FUNDING_PASS} -url=jdbc:postgresql://$${PG_FUNDING_HOST}:$${PG_FUNDING_PORT}/$${PG_FUNDING_DB} migrate"]
+          env:
+            - name: PG_FUNDING_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: funding-db-config
+                  key: host
+            - name: PG_FUNDING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: funding-db-config
+                  key: port
+            - name: PG_FUNDING_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: funding-db-config
+                  key: db
+            - name: PG_FUNDING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: funding-db-creds
+                  key: user
+            - name: PG_FUNDING_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: funding-db-creds
+                  key: pass
+      containers:
+        - name: funding-consumer
+          image: rhorv/wp-poc:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "/srv/run_funding.sh"]
+          env:
+            - name: PG_FUNDING_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: funding-db-config
+                  key: host
+            - name: PG_FUNDING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: funding-db-config
+                  key: port
+            - name: PG_FUNDING_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: funding-db-config
+                  key: db
+            - name: PG_FUNDING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: funding-db-creds
+                  key: user
+            - name: PG_FUNDING_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: funding-db-creds
+                  key: pass
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: KAFKA_CLEARING_EXTERNAL_TOPIC_NAME
+              value: "clearing-payment"
+            - name: KAFKA_FUNDING_EXTERNAL_TOPIC_NAME
+              value: "funding-payment"
+            - name: KAFKA_FUNDING_INTERNAL_TOPIC_NAME
+              value: "funding-internal"
