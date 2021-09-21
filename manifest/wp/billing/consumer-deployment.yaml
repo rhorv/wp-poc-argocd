@@ -37,7 +37,7 @@ spec:
             - name: INTERNAL_TOPIC_NAME
               value: "billing-internal"
         - name: db-migration
-          image: rhorv/wp-poc-db-infra:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
+          image: rhorv/wp-poc-db-infra:8d68f0e3351c299fc1290ede20e865604ff9e3d8
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/billing -user=$${PG_BILLING_USER} -password=$${PG_BILLING_PASS} -url=jdbc:postgresql://$${PG_BILLING_HOST}:$${PG_BILLING_PORT}/$${PG_BILLING_DB} migrate"]
           env:
@@ -68,7 +68,7 @@ spec:
                   key: pass
       containers:
         - name: billing-consumer
-          image: rhorv/wp-poc:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
+          image: rhorv/wp-poc:8d68f0e3351c299fc1290ede20e865604ff9e3d8
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_billing.sh"]
           env:

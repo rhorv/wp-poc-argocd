@@ -37,7 +37,7 @@ spec:
             - name: INTERNAL_TOPIC_NAME
               value: "funding-internal"
         - name: db-migration
-          image: rhorv/wp-poc-db-infra:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
+          image: rhorv/wp-poc-db-infra:8d68f0e3351c299fc1290ede20e865604ff9e3d8
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/funding -user=$${PG_FUNDING_USER} -password=$${PG_FUNDING_PASS} -url=jdbc:postgresql://$${PG_FUNDING_HOST}:$${PG_FUNDING_PORT}/$${PG_FUNDING_DB} migrate"]
           env:
@@ -68,7 +68,7 @@ spec:
                   key: pass
       containers:
         - name: funding-consumer
-          image: rhorv/wp-poc:7cd404fd13a6bcccdbcdc54fabc66ee78f17fea9
+          image: rhorv/wp-poc:8d68f0e3351c299fc1290ede20e865604ff9e3d8
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh", "/srv/run_funding.sh"]
           env:
