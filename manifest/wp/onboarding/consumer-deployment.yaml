@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-poc-onboarding
+  labels:
+    app.wp.poc/name: wp-onboarding
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.wp.poc/name: wp-onboarding
+  template:
+    metadata:
+      labels:
+        app.wp.poc/name: wp-onboarding
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      initContainers:
+        - name: kafka-topic-setup
+          image: rhorv/kafka-adm:latest
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "/tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${EXTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT} && /tmp/kafka_2.13-2.8.0/bin/kafka-topics.sh --create --if-not-exists --topic $${INTERNAL_TOPIC_NAME} --bootstrap-server $${KAFKA_HOST}:$${KAFKA_PORT}"]
+          env:
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: EXTERNAL_TOPIC_NAME
+              value: "onboarding-merchant"
+            - name: INTERNAL_TOPIC_NAME
+              value: "onboarding-internal"
+        - name: db-migration
+          image: rhorv/wp-poc-db-infra:7e6e7c6ffd75f55ff11b0b7fc972b7aadae344a3
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c", "flyway -locations=filesystem:/srv/onboarding -user=$${PG_ONBOARDING_USER} -password=$${PG_ONBOARDING_PASS} -url=jdbc:postgresql://$${PG_ONBOARDING_HOST}:$${PG_ONBOARDING_PORT}/$${PG_ONBOARDING_DB} migrate"]
+          env:
+            - name: PG_ONBOARDING_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: onboarding-db-config
+                  key: host
+            - name: PG_ONBOARDING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: onboarding-db-config
+                  key: port
+            - name: PG_ONBOARDING_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: onboarding-db-config
+                  key: db
+            - name: PG_ONBOARDING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: onboarding-db-creds
+                  key: user
+            - name: PG_ONBOARDING_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: onboarding-db-creds
+                  key: pass
+      containers:
+        - name: onboarding-consumer
+          image: rhorv/wp-poc:7e6e7c6ffd75f55ff11b0b7fc972b7aadae344a3
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "/srv/run_onboarding.sh"]
+          env:
+            - name: PG_ONBOARDING_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: onboarding-db-config
+                  key: host
+            - name: PG_ONBOARDING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: onboarding-db-config
+                  key: port
+            - name: PG_ONBOARDING_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: onboarding-db-config
+                  key: db
+            - name: PG_ONBOARDING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: onboarding-db-creds
+                  key: user
+            - name: PG_ONBOARDING_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: onboarding-db-creds
+                  key: pass
+            - name: KAFKA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: host
+            - name: KAFKA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: port
+            - name: KAFKA_ONBOARDING_EXTERNAL_TOPIC_NAME
+              value: "onboarding-merchant"
+            - name: KAFKA_ONBOARDING_INTERNAL_TOPIC_NAME
+              value: "onboarding-internal"
